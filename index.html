@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net; connect-src 'self' https://*.googleapis.com https://www.google.com; frame-src https://www.google.com https://www.recaptcha.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="An unofficial fan arcade with two Jetty Boot games and public leaderboards.">
+<title>Jetty Boot Fan Arcade</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--PAGE-->
+<main class="room">
+  <h1 class="sr-only">Jetty Boot Fan Arcade</h1>
+  <div class="row">
+    <section class="cab cab--one" data-game="jetty1" aria-label="Jetty Boot arcade machine">
+      <div class="cab__marquee">JETTY BOOT</div>
+      <div class="cab__bezel"><canvas class="cab__screen" id="screen-jetty1" aria-hidden="true"></canvas></div>
+      <div class="cab__deck" aria-hidden="true"><span class="stick"></span><span class="btn"></span><span class="btn"></span></div>
+      <button class="cab__slot" type="button" data-game="jetty1" aria-label="Insert coin into Jetty Boot"><span class="slot__hole"></span><span class="slot__label">COIN</span></button>
+      <div class="cab__base" aria-hidden="true"></div>
+    </section>
+    <section class="cab cab--two" data-game="jetty2" aria-label="Jetty Boot2: Sole Survivor arcade machine">
+      <div class="cab__marquee">JETTY BOOT<span class="two">2</span></div>
+      <div class="cab__bezel"><canvas class="cab__screen" id="screen-jetty2" aria-hidden="true"></canvas></div>
+      <div class="cab__deck" aria-hidden="true"><span class="stick"></span><span class="btn"></span><span class="btn"></span><span class="btn"></span></div>
+      <button class="cab__slot" type="button" data-game="jetty2" aria-label="Insert coin into Jetty Boot2: Sole Survivor"><span class="slot__hole"></span><span class="slot__label">COIN</span></button>
+      <div class="cab__base" aria-hidden="true"></div>
+    </section>
+  </div>
+  <div class="floor" aria-hidden="true"></div>
+</main>
+
+<footer class="foot">
+  <div class="foot__btns">
+    <button class="pxbtn" id="mute" type="button" aria-pressed="false">SOUND ON</button>
+  </div>
+  <p class="fine">Unofficial fan project with original art and code. Not affiliated with Ghost Ship Games. Deep Rock Galactic and Jetty Boot belong to their owners.</p>
+</footer>
+
+<p id="hint" class="hint" role="status" aria-live="polite"></p>
+<button id="coin" class="coin" type="button" aria-label="A coin"></button>
+
+<div id="stage" class="stage" hidden>
+  <div class="stage__bar">
+    <span id="stage-title">JETTY BOOT</span>
+    <button class="pxbtn" id="quit" type="button">QUIT</button>
+  </div>
+  <div class="stage__screen" id="stage-screen"><canvas id="stage-canvas"></canvas></div>
+  <form id="name-form" class="entry" hidden novalidate>
+    <label for="name-input">ENTER YOUR NAME (10 MAX)</label>
+    <div class="entry__row">
+      <input id="name-input" name="name" type="text" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+      <button class="pxbtn" id="save" type="submit">SAVE</button>
+      <button class="pxbtn pxbtn--quiet" id="skip" type="button">SKIP</button>
+    </div>
+    <p id="entry-msg" class="entry__msg" role="status"></p>
+  </form>
+  <div id="after" class="after" hidden>
+    <button class="pxbtn" id="exit" type="button">BACK TO THE ARCADE</button>
+  </div>
+  <p class="stage__tip" id="tip"></p>
+</div>
+
+<div id="crawl" class="crawl" hidden aria-label="Top 100 scores">
+  <div class="crawl__plane"><div class="crawl__text" id="crawl-text"></div></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/board.js"></script>
+<script src="js/jetty1.js"></script>
+<script src="js/jetty2.js"></script>
+<script src="js/arcade.js"></script>
+<!--/PAGE-->
+</body>
+</html>
