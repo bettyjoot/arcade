@@ -8,10 +8,27 @@
   'use strict';
   var JB = window.JB, game = JB.games.jetty1, art = game.art;
   var W = game.W, H = game.H, TOP = 44, GROUND = 288, MID = 160;
-  var BX = 60, BW = 12, BH = 10, WW = 16, SPACING = 98;
-  var GRAV = 0.17, THRUST = 0.29, KICK = -0.6, MAX_UP = -2.2, MAX_DOWN = 4.6;
-  var SCROLL = 0.92, PER_LEVEL = 10, TILT = 0.24;
+  /* Proportions measured from the real cabinet, as shares of the play field height:
+     wall thickness about 8%, boot about 6% by 5%, wall to wall about 40 to 50%. */
+  var FIELD = GROUND - TOP, GAP = Math.round(FIELD / 4), FIRST_GAP = Math.round(FIELD / 2);
+  var BPX = 1.25, BX = 60, BW = 12 * BPX, BH = 10 * BPX, WW = 20, SPACING = 100;
+  /* Flight measured frame by frame from a recording of the real cabinet. A press
+     sends the boot up at once at a fixed speed (about 0.69 field heights a second),
+     whatever it was doing before; it keeps that speed while held, and gravity
+     (about 2.7 field heights a second, each second) takes over on release.
+     The walls pass at one every 1.28 seconds, the same rhythm as the cabinet. */
+  var GRAV = 0.183, CLIMB = 2.8, MAX_DOWN = 8;
+  var PACE = SPACING / 1.28 / 60, PER_LEVEL = 10, TILT = 0.24;
   var BG = art.BG, G = art.G, BAND = art.BAND, HI = art.HI, DIM = art.DIM;
+
+  var K = 8, layer = null;
+  function bootLayer() {
+    if (!layer) {
+      var cv = document.createElement('canvas'); cv.width = 12 * K; cv.height = 24 * K;
+      layer = cv.getContext('2d');
+    }
+    return layer;
+  }
 
   function Run(seed, hi) {
     this.seed = seed >>> 0;
@@ -22,7 +39,7 @@
     this.spawned = 0; this.passed = 0;
     this.tick = 0; this.grace = true; this.inv = 0; this.freeze = 0; this.banner = 0;
     this.down = false; this.thrust = false; this.held = 0; this.tilt = 0; this.clear = 0;
-    this.over = false; this.events = []; this.inputs = []; this.auto = false;
+    this.burn = 0; this.over = false; this.events = []; this.inputs = []; this.auto = false;
   }
 
   /* inp.thrust: is the button held this tick. */
@@ -67,8 +84,14 @@
       if (pressed) { this.grace = false; }
       else { this.thrust = false; this.y = MID + Math.sin(this.tick * 0.1) * 3; return; }
     }
-    var speed = Math.min(62 + (this.level - 1) * 7, 125) * SCROLL / 60;
-    var gap = Math.max(76 - (this.level - 1) * 3, 50);
+    /* The pace never changes. Later levels are harder because of the path: the
+       first wall of a level always has the same wide, centered opening (half the
+       field). Every other opening is a quarter of the field, and each one sits
+       further from the last as levels go up, so the boot climbs and dives more. */
+    var speed = PACE;
+    var gap = GAP;
+    var swingMin = Math.min(8 + (this.level - 1) * 7, 48);
+    var swingMax = Math.min(48 + (this.level - 1) * 8, 92);
 
     /* Once the last wall of the level is behind it, the boot flies itself: it holds
        its height, eases away from the floor and roof, and cannot crash. */
@@ -80,12 +103,11 @@
       this.y += (safe - this.y) * 0.08;
       this.tilt += (0 - this.tilt) * 0.18;
     } else {
-      if (pressed) { this.vy = Math.min(this.vy, KICK); }
-      if (down) { this.vy -= THRUST; this.held = Math.min(this.held + 1, 30); } else { this.held = 0; }
-      this.thrust = down;
-      this.tilt += ((down ? 1 : 0) - this.tilt) * 0.18;
-      this.vy += GRAV;
-      if (this.vy < MAX_UP) { this.vy = MAX_UP; }
+      if (down) { this.vy = -CLIMB; this.held = Math.min(this.held + 1, 30); this.burn = 10; }
+      else { this.vy += GRAV; this.held = 0; if (this.burn > 0) { this.burn--; } }
+      /* The flame and tilt linger for a moment after a tap, as on the cabinet. */
+      this.thrust = down || this.burn > 0;
+      this.tilt += ((this.thrust ? 1 : 0) - this.tilt) * 0.18;
       if (this.vy > MAX_DOWN) { this.vy = MAX_DOWN; }
       this.y += this.vy;
     }
@@ -94,12 +116,23 @@
     if (this.spawned < PER_LEVEL && (!last || last.x <= W - SPACING)) {
       var lo = TOP + 14, hiY = GROUND - 14 - gap;
       var gy = lo + this.rand() * (hiY - lo);
-      if (last) { gy = Math.max(last.gy - 100, Math.min(last.gy + 100, gy)); }
-      this.walls.push({ x: W + 4, px: W + 4, gy: Math.round(gy), gap: gap, passed: false });
+      var wgap = gap;
+      if (this.spawned === 0) {
+        wgap = FIRST_GAP; gy = TOP + (FIELD - FIRST_GAP) / 2;
+      } else if (last) {
+        /* Step up or down from the previous opening by an amount set by the level,
+           measured between the middles of the two openings. */
+        var from = last.gy + last.gap / 2 - gap / 2;
+        var swing = swingMin + this.rand() * (swingMax - swingMin);
+        var dir = this.rand() < 0.5 ? -1 : 1;
+        if (from + dir * swing < lo || from + dir * swing > hiY) { dir = -dir; }
+        gy = Math.max(lo, Math.min(hiY, from + dir * swing));
+      }
+      this.walls.push({ x: W + 4, px: W + 4, gy: Math.round(gy), gap: wgap, passed: false });
       this.spawned++;
     }
     /* The hit box is the boot's body only. The flame is never part of it. */
-    var hit = false, bx = BX + 3, by = this.y + 1, bw = BW - 4, bh = BH - 2;
+    var hit = false, bx = BX + 4, by = this.y + 1, bw = BW - 5, bh = BH - 2;
     for (var i = 0; i < this.walls.length; i++) {
       var w = this.walls[i];
       w.x -= speed;
@@ -151,11 +184,20 @@
       c.fillStyle = G;
       for (i = 0; i < 8; i++) {
         var an = i * Math.PI / 4;
-        c.fillRect(Math.round(BX + 6 + Math.cos(an) * r * 0.5), Math.round(y + 5 + Math.sin(an) * r * 0.5), 2, 2);
+        c.fillRect(Math.round(BX + BW / 2 + Math.cos(an) * r * 0.5), Math.round(y + BH / 2 + Math.sin(an) * r * 0.5), 2, 2);
       }
     } else if (!this.over && !(this.inv > 0 && this.tick % 8 < 4)) {
-      var power = this.grace || this.auto ? 0.2 : (this.thrust ? 0.35 + this.held / 30 * 0.65 : 0);
-      art.drawBoot(c, BX, y, 1, G, this.clear > 0 ? 0 : power, t, this.tilt * TILT);
+      var power = this.grace || this.auto ? 0.2 : (this.thrust ? 0.45 + this.held / 30 * 0.55 : 0);
+      /* Drawn large on a spare canvas, then placed at the game's boot size, so the
+         pixels stay solid at any screen scale and tilt. */
+      var oc = bootLayer();
+      oc.clearRect(0, 0, 12 * K, 24 * K);
+      art.drawBoot(oc, 0, 0, K, G, this.clear > 0 ? 0 : power, t, 0);
+      c.save();
+      c.translate(BX + BW / 2, y + BH / 2); c.rotate(this.tilt * TILT);
+      c.imageSmoothingEnabled = true;
+      c.drawImage(oc.canvas, -BW / 2, -BH / 2, BW, 24 * BPX);
+      c.restore();
     }
 
     if (this.over) {
