@@ -12,8 +12,11 @@ window.JB_CONFIG = {
     projectId: "bettyjootarcade",
     appId: "1:414808094272:web:4379a000aea69b0a3bd1a5"
   },
-  /* Optional but recommended: reCAPTCHA v3 site key registered in Firebase App Check. */
-  appCheckSiteKey: "",
+  /* Optional bot check (Firebase App Check). Leave empty to run without it.
+     Use a reCAPTCHA Enterprise key: a score-based Website key created in the
+     Google Cloud console and registered in Firebase App Check. */
+  appCheckSiteKey: "6LeaS-ktAAAAABDxx2kz2G4zXJnpFObN8-9fuPar",
+  appCheckProvider: "enterprise",
   /* Your own music, one entry per game, looped without a gap during play.
      Empty means no music for that game.
      - A WAV cut to an exact loop can be given as just its file name.
