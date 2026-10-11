@@ -78,8 +78,11 @@
     ]).then(function (m) {
       var app = m[0].initializeApp(CFG.firebase);
       if (m[3]) {
+        /* Bot check. Google has retired classic reCAPTCHA v3 keys for new sites, so the
+           default is a reCAPTCHA Enterprise key (created in the Google Cloud console). */
+        var Provider = CFG.appCheckProvider === 'v3' ? m[3].ReCaptchaV3Provider : m[3].ReCaptchaEnterpriseProvider;
         m[3].initializeAppCheck(app, {
-          provider: new m[3].ReCaptchaV3Provider(CFG.appCheckSiteKey),
+          provider: new Provider(CFG.appCheckSiteKey),
           isTokenAutoRefreshEnabled: true
         });
       }
