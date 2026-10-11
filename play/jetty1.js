@@ -22,7 +22,7 @@
     this.spawned = 0; this.passed = 0;
     this.tick = 0; this.grace = true; this.inv = 0; this.freeze = 0; this.banner = 0;
     this.down = false; this.thrust = false; this.held = 0; this.tilt = 0; this.clear = 0;
-    this.over = false; this.events = []; this.inputs = [];
+    this.over = false; this.events = []; this.inputs = []; this.auto = false;
   }
 
   /* inp.thrust: is the button held this tick. */
@@ -55,7 +55,7 @@
       this.thrust = false;
       this.clear--;
       if (this.clear === 0) {
-        this.level++; this.walls = []; this.spawned = 0; this.passed = 0;
+        this.level++; this.walls = []; this.spawned = 0; this.passed = 0; this.auto = false;
         this.y = MID; this.py = MID; this.vy = 0; this.tilt = 0;
         this.grace = true; this.banner = 150;
       }
@@ -70,14 +70,25 @@
     var speed = Math.min(62 + (this.level - 1) * 7, 125) * SCROLL / 60;
     var gap = Math.max(76 - (this.level - 1) * 3, 50);
 
-    if (pressed) { this.vy = Math.min(this.vy, KICK); }
-    if (down) { this.vy -= THRUST; this.held = Math.min(this.held + 1, 30); } else { this.held = 0; }
-    this.thrust = down;
-    this.tilt += ((down ? 1 : 0) - this.tilt) * 0.18;
-    this.vy += GRAV;
-    if (this.vy < MAX_UP) { this.vy = MAX_UP; }
-    if (this.vy > MAX_DOWN) { this.vy = MAX_DOWN; }
-    this.y += this.vy;
+    /* Once the last wall of the level is behind it, the boot flies itself: it holds
+       its height, eases away from the floor and roof, and cannot crash. */
+    var auto = this.passed >= PER_LEVEL;
+    this.auto = auto;
+    if (auto) {
+      var safe = Math.max(TOP + 34, Math.min(GROUND - BH - 34, this.y));
+      this.vy = 0; this.held = 0; this.thrust = false;
+      this.y += (safe - this.y) * 0.08;
+      this.tilt += (0 - this.tilt) * 0.18;
+    } else {
+      if (pressed) { this.vy = Math.min(this.vy, KICK); }
+      if (down) { this.vy -= THRUST; this.held = Math.min(this.held + 1, 30); } else { this.held = 0; }
+      this.thrust = down;
+      this.tilt += ((down ? 1 : 0) - this.tilt) * 0.18;
+      this.vy += GRAV;
+      if (this.vy < MAX_UP) { this.vy = MAX_UP; }
+      if (this.vy > MAX_DOWN) { this.vy = MAX_DOWN; }
+      this.y += this.vy;
+    }
 
     var last = this.walls[this.walls.length - 1];
     if (this.spawned < PER_LEVEL && (!last || last.x <= W - SPACING)) {
@@ -100,6 +111,7 @@
     while (this.walls.length && this.walls[0].x < -WW - 4) { this.walls.shift(); }
     var roof = this.y <= TOP, floor = this.y + BH >= GROUND;
     if (roof || floor) { hit = true; }
+    if (auto) { hit = false; roof = false; floor = false; }
     if (hit && this.inv === 0) {
       this.lives--; this.freeze = 50; this.thrust = false; this.events.push('hit');
     } else if (roof) {
@@ -142,7 +154,7 @@
         c.fillRect(Math.round(BX + 6 + Math.cos(an) * r * 0.5), Math.round(y + 5 + Math.sin(an) * r * 0.5), 2, 2);
       }
     } else if (!this.over && !(this.inv > 0 && this.tick % 8 < 4)) {
-      var power = this.grace ? 0.2 : (this.thrust ? 0.35 + this.held / 30 * 0.65 : 0);
+      var power = this.grace || this.auto ? 0.2 : (this.thrust ? 0.35 + this.held / 30 * 0.65 : 0);
       art.drawBoot(c, BX, y, 1, G, this.clear > 0 ? 0 : power, t, this.tilt * TILT);
     }
 
