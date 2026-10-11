@@ -145,6 +145,7 @@ body.playing { overflow: hidden; }
   gap: 10px;
 }
 .foot__btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.dedication { margin: 0; max-width: 60ch; font-size: 17px; color: var(--gold); opacity: 0.85; }
 .fine { margin: 0; max-width: 60ch; font-size: 16px; color: var(--dim); }
 .pxbtn {
   font-family: var(--font-px);
@@ -180,7 +181,34 @@ body.playing { overflow: hidden; }
   opacity: 0.8;
 }
 .coin::before { content: ""; position: absolute; inset: -12px; }
+/* A four-point glint that flares on the coin every few seconds. */
+.coin::after {
+  content: "";
+  position: absolute;
+  left: -7px; top: -9px;
+  width: 18px; height: 18px;
+  background: #fffbe0;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  filter: drop-shadow(0 0 3px #ffe58a);
+  transform: scale(0) rotate(0deg);
+  opacity: 0;
+  pointer-events: none;
+  animation: coin-twinkle 3.6s ease-in-out infinite;
+}
+.coin { animation: coin-shine 3.6s ease-in-out infinite; }
+@keyframes coin-twinkle {
+  0%, 58%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  68% { transform: scale(1) rotate(45deg); opacity: 1; }
+  78% { transform: scale(0) rotate(90deg); opacity: 0; }
+  84% { transform: translate(17px, 20px) scale(0.55) rotate(0deg); opacity: 0.9; }
+  92% { transform: translate(17px, 20px) scale(0) rotate(45deg); opacity: 0; }
+}
+@keyframes coin-shine {
+  0%, 55%, 100% { opacity: 0.8; }
+  68% { opacity: 1; }
+}
 .coin.is-drag { opacity: 1; cursor: grabbing; animation: none; }
+.coin.is-drag::after { animation: none; opacity: 0; }
 .coin.is-back { transition: transform 0.25s; }
 .hint {
   position: fixed;
@@ -291,4 +319,5 @@ body.playing { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .cab, .coin.is-back { transition: none; }
+  .coin, .coin::after { animation: none; }
 }
