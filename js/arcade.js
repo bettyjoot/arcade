@@ -318,7 +318,7 @@
   function fillCrawl(g, rows) {
     crawlText.textContent = '';
     var h = document.createElement('h2');
-    h.textContent = g.name + (g.id === 'jetty2' ? ': SOLE SURVIVOR' : '');
+    h.textContent = g.name + (g.sub ? ': ' + g.sub : '');
     crawlText.appendChild(h);
     var p = document.createElement('p');
     p.textContent = rows.length ? 'THE TOP ' + rows.length + ' ON RECORD' : 'NO SCORES YET. BE THE FIRST.';

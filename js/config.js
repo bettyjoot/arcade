@@ -26,7 +26,7 @@ window.JB_CONFIG = {
      - `volume` (0 to 1) turns one track down relative to the other. */
   music: {
     jetty1: { src: "audio/jetty-boot.mp3", loop: 37.333333, lead: 0.013333, volume: 0.75 },
-    jetty2: { src: "audio/sole-survivor.mp3", loop: 68.108104, lead: 0 }
+    jetty2: { src: "audio/in-2-deep.mp3", loop: 68.108104, lead: 0 }
   },
   musicVolume: 0.5,
   /* Pinned Firebase SDK version loaded from gstatic. */

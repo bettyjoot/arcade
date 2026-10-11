@@ -1,5 +1,5 @@
 /*
- * Jetty Boot2: Sole Survivor cabinet: title and high-score screens shown in the
+ * Jetty Boots: In 2 Deep cabinet: title and high-score screens shown in the
  * room, plus the shared art (four original miners, original bugs). The game
  * itself is in play/jetty2.js and is only fetched after a coin goes in.
  */
@@ -127,12 +127,12 @@
     JB.text(c, 'JETTY', W / 2 + 2, y + 2, 20, INK);
     JB.text(c, 'JETTY', W / 2, y, 20, WHITE);
     c.font = '20px ' + JB.FONT;
-    var bw = c.measureText('BOOT').width, tw = c.measureText('BOOT2').width, x0 = W / 2 - tw / 2;
-    JB.text(c, 'BOOT2', x0 + 2, y + 28, 20, INK, 'left');
+    var bw = c.measureText('BOOT').width, tw = c.measureText('BOOTS').width, x0 = W / 2 - tw / 2;
+    JB.text(c, 'BOOTS', x0 + 2, y + 28, 20, INK, 'left');
     JB.text(c, 'BOOT', x0, y + 26, 20, WHITE, 'left');
-    JB.text(c, '2', x0 + bw, y + 26, 20, GOLD, 'left');
+    JB.text(c, 'S', x0 + bw, y + 26, 20, GOLD, 'left');
     c.fillStyle = BAND; c.fillRect(30, y + 56, W - 60, 16);
-    JB.text(c, 'SOLE SURVIVOR', W / 2, y + 61, 7, GOLD);
+    JB.text(c, 'IN 2 DEEP', W / 2, y + 61, 7, GOLD);
   }
 
   function attract(c, t, rows, note) {
@@ -156,7 +156,7 @@
   }
 
   JB.games.jetty2 = {
-    id: 'jetty2', name: 'JETTY BOOT2', W: W, H: H, ready: true,
+    id: 'jetty2', name: 'JETTY BOOTS', sub: 'IN 2 DEEP', W: W, H: H, ready: true,
     src: 'play/jetty2.js',
     attract: attract,
     art: { CLASSES: CLASSES, BUGS: BUGS, drawMiner: drawMiner, backdrop: backdrop, lava: lava, title: title,

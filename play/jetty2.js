@@ -1,5 +1,5 @@
 /*
- * Jetty Boot2: Sole Survivor (fan game): the game itself. Fetched only after a
+ * Jetty Boots: In 2 Deep (fan game): the game itself. Fetched only after a
  * coin is inserted. Pick a miner and fly through the cave to the drop pod.
  * One-hand controls: hold for boots, swipe (or arrow keys) to turn, swipe down
  * to stop. The miner shoots by itself at bugs in front of it.
@@ -791,7 +791,7 @@
   function scoreScreen(c, t, rows, score) {
     art.backdrop(c, t * 20, t);
     c.fillStyle = 'rgba(18,12,38,0.82)'; c.fillRect(10, 10, W - 20, H - 20);
-    JB.text(c, 'SOLE SURVIVOR', W / 2, 24, 10, GOLD);
+    JB.text(c, 'IN 2 DEEP', W / 2, 24, 10, GOLD);
     JB.text(c, 'HIGH SCORES', W / 2, 52, 8, WHITE);
     JB.drawScores(c, { W: W, y: 78, rows: rows, color: WHITE, dim: PINK, hi: GOLD, band: BAND });
     JB.text(c, 'YOUR SCORE ' + score, W / 2, 262, 8, GOLD);
